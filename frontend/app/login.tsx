@@ -20,14 +20,34 @@ export default function LoginScreen() {
     const [loginDisabled, setLoginDisabled] = useState(true);
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (username && password) setLoginDisabled(false);
         else setLoginDisabled(true);
     }, [username, password]);
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
         console.log('submit clicked = ', username, password)
+        try {
+            setLoading(true);
+            // Simulate an API call
+            const resp = await fetch("http://10.0.2.2:8080/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+            });
+            const respData = await resp.json();
+            console.log('Login response = ', respData);
+
+        } catch (error) {
+            console.error('Login error:', error);
+        }
+        finally {
+            setLoading(false);
+        }
     }
 
     return (

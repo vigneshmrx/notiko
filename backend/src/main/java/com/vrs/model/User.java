@@ -33,6 +33,10 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -43,5 +47,16 @@ public class User {
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", passwordHash='" + passwordHash + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }
