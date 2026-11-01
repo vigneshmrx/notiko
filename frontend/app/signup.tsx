@@ -7,7 +7,8 @@ import ThemeToggle from "@/components/ui/theme-toggle";
 import { Link, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
-
+import { Loader2 } from 'lucide-react-native';
+import { Icon } from "@/components/ui/icon";
 
 const SCREEN_OPTIONS = {
     title: 'Signup',
@@ -23,18 +24,20 @@ export default function SignupScreen() {
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [repeatPassword, setRepeatPassword] = useState<string>('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-            if (email && username && password && repeatPassword) setSignupDisabled(false);
-            else setSignupDisabled(true);
-        }, [email, username, password, repeatPassword]);
+        if (email && username && password && repeatPassword) setSignupDisabled(false);
+        else setSignupDisabled(true);
+    }, [email, username, password, repeatPassword]);
 
     const onSubmit = () => {
         console.log('submit clicked = ', email, username, password)
     }
 
     return (
-        <Stack.Screen options={SCREEN_OPTIONS}>
+        <>
+            <Stack.Screen options={SCREEN_OPTIONS} />
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
                 className="flex-1"
@@ -105,7 +108,13 @@ export default function SignupScreen() {
                         </CardContent>
 
                         <CardFooter className="flex-col">
-                            <Button className="w-full" disabled={signupDisabled} onPress={onSubmit}>
+                            <Button
+                                className="w-full"
+                                disabled={signupDisabled || loading}
+                                onPress={onSubmit}>
+                                {loading && <View className="pointer-events-none animate-spin">
+                                    <Icon as={Loader2} className="text-primary-foreground" />
+                                </View>}
                                 <Text>Sign up</Text>
                             </Button>
 
@@ -119,6 +128,6 @@ export default function SignupScreen() {
                     </Card>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </Stack.Screen>
+        </>
     )
 }

@@ -7,7 +7,6 @@ import com.vrs.model.User;
 import com.vrs.repo.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,11 +28,6 @@ public class MainController {
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public void signup(@RequestBody SignupRequest request) {
-        System.out.println(request.toString());
-//        String hash = encoder.encode(request.password());
-//        System.out.println("Hashed pwd = " + hash);
-//        System.out.println("PWD matches = " + encoder.matches(request.password(), hash));
-
         String email = request.email().toLowerCase().trim();
         String username = request.username().trim();
 
