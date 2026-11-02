@@ -12,6 +12,7 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 import { API_URL } from "@/lib/api";
 import { Loader2 } from 'lucide-react-native';
 import { Icon } from "@/components/ui/icon";
+import { useAuth } from "@/lib/auth";
 
 const SCREEN_OPTIONS = {
     title: 'Login',
@@ -20,7 +21,7 @@ const SCREEN_OPTIONS = {
 };
 
 export default function LoginScreen() {
-    const router = useRouter();
+    const { signIn } = useAuth();
 
     const [loginDisabled, setLoginDisabled] = useState(true);
     const [username, setUsername] = useState<string>('');
@@ -34,10 +35,9 @@ export default function LoginScreen() {
     }, [username, password]);
 
     const onSubmit = async () => {
-        console.log('submit clicked = ', username, password)
+        setError(null);
         try {
             setLoading(true);
-            // Simulate an API call
             console.log('simulating API call...');
             const resp = await fetch(`${API_URL}/api/auth/login`, {
                 method: "POST",
@@ -46,16 +46,15 @@ export default function LoginScreen() {
                 },
                 body: JSON.stringify({ username, password }),
             });
-            console.log('Login resp = ', resp);
-            const respData = await resp.json();
-            console.log('Login response = ', respData);
 
-            if (respData.status !== 200) {
-                setError(respData.message || "Some error occurred");
-            } else {
+            const data = await resp.json().catch(() => null);
 
+            if (!resp.ok) {
+                setError(data?.message || 'Some error occurred');
+                return;
             }
 
+            await signIn(data.token);
         } catch (error) {
             console.log('Login error:', error);
             setError("Some error occurred");

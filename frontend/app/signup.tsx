@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { Loader2 } from 'lucide-react-native';
 import { Icon } from "@/components/ui/icon";
+import { useAuth } from "@/lib/auth";
 
 const SCREEN_OPTIONS = {
     title: 'Signup',
@@ -17,7 +18,7 @@ const SCREEN_OPTIONS = {
 };
 
 export default function SignupScreen() {
-    const router = useRouter();
+    const { signIn } = useAuth();
 
     const [signupDisabled, setSignupDisabled] = useState(false);
     const [email, setEmail] = useState<string>('');

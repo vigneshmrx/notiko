@@ -32,7 +32,7 @@ public class MainController {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public void signup(@RequestBody SignupRequest request) {
+    public AuthResponse signup(@RequestBody SignupRequest request) {
         String email = request.email().toLowerCase().trim();
         String username = request.username().trim();
 
@@ -45,7 +45,10 @@ public class MainController {
         }
 
         String hash = encoder.encode(request.password());
-        users.save(new User(email, username, hash));
+        User saved = users.save(new User(email, username, hash));
+
+        String token = jwtService.generate(saved.getId(), saved.getUsername());
+        return new AuthResponse(token, new UserResponse(saved.getId(), saved.getEmail(), saved.getUsername()));
     }
 
     @PostMapping("/login")

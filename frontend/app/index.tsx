@@ -52,10 +52,6 @@ export default function Screen() {
               <Icon as={StarIcon} />
             </Button>
           </Link>
-
-          <Link href="/login">
-            <Text>To Login</Text>
-          </Link>
         </View>
       </View>
     </>
