@@ -31,6 +31,7 @@ function RootNavigator() {
     <Stack>
       <Stack.Protected guard={isLoggedIn}>
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Screen name="new-note" options={{ title: "New Note" }} />
       </Stack.Protected>
 
       <Stack.Protected guard={!isLoggedIn}>
