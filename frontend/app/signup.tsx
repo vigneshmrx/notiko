@@ -12,9 +12,11 @@ import { Icon } from "@/components/ui/icon";
 import { useAuth } from "@/lib/auth";
 
 const SCREEN_OPTIONS = {
-    title: 'Signup',
+    title: '',
     headerTransparent: true,
-    headerRight: () => <ThemeToggle />,
+    headerBackVisible: false,
+    gestureEnabled: false,
+    headerRight: () => <ThemeToggle />
 };
 
 export default function SignupScreen() {

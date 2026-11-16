@@ -15,9 +15,11 @@ import { Icon } from "@/components/ui/icon";
 import { useAuth } from "@/lib/auth";
 
 const SCREEN_OPTIONS = {
-    title: 'Login',
+    title: '',
     headerTransparent: true,
-    headerRight: () => <ThemeToggle />,
+    headerBackVisible: false,
+    gestureEnabled: false,
+    headerRight: () => <ThemeToggle />
 };
 
 export default function LoginScreen() {
