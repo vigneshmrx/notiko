@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": ".",
-    "slug": ".",
+    "name": "Notiko",
+    "slug": "notiko-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -17,7 +17,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.vignesh.notikoapp"
     },
     "web": {
       "bundler": "metro",
@@ -39,6 +40,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "81afdb9a-5092-443e-928f-9c1a605b674a"
+      }
     }
   }
 }

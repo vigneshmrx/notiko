@@ -59,7 +59,8 @@ export default function LoginScreen() {
             await signIn(data.token);
         } catch (error) {
             console.log('Login error:', error);
-            setError("Some error occurred");
+            const message = error instanceof Error ? error.message : 'Unknown error';
+            setError("Some error occurred: " + message);
         }
         finally {
             setLoading(false);
@@ -116,6 +117,8 @@ export default function LoginScreen() {
                                     />
                                 </View>
                             </View>
+
+                            <Text>URL Used: {API_URL}</Text>
                         </CardContent>
 
                         <CardFooter className="flex-col">

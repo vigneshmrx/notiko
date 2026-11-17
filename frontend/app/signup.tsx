@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/text";
@@ -7,36 +14,70 @@ import ThemeToggle from "@/components/ui/theme-toggle";
 import { Link, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
-import { Loader2 } from 'lucide-react-native';
+import { Loader2 } from "lucide-react-native";
 import { Icon } from "@/components/ui/icon";
 import { useAuth } from "@/lib/auth";
+import { API_URL } from "@/lib/api";
+import { AlertCircleIcon } from 'lucide-react-native';
+import { Alert, AlertTitle } from "@/components/ui/alert";
 
 const SCREEN_OPTIONS = {
-    title: '',
+    title: "",
     headerTransparent: true,
     headerBackVisible: false,
     gestureEnabled: false,
-    headerRight: () => <ThemeToggle />
+    headerRight: () => <ThemeToggle />,
 };
 
 export default function SignupScreen() {
     const { signIn } = useAuth();
 
     const [signupDisabled, setSignupDisabled] = useState(false);
-    const [email, setEmail] = useState<string>('');
-    const [username, setUsername] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [repeatPassword, setRepeatPassword] = useState<string>('');
+    const [email, setEmail] = useState<string>("");
+    const [username, setUsername] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [repeatPassword, setRepeatPassword] = useState<string>("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (email && username && password && repeatPassword) setSignupDisabled(false);
+        if (email && username && password && repeatPassword)
+            setSignupDisabled(false);
         else setSignupDisabled(true);
     }, [email, username, password, repeatPassword]);
 
-    const onSubmit = () => {
-        console.log('submit clicked = ', email, username, password)
-    }
+    const onSubmit = async () => {
+        console.log("submit clicked = ", email, username, password);
+        setError(null);
+
+        try {
+            setLoading(true);
+            console.log('url = ', API_URL)
+            const resp = await fetch(`${API_URL}/api/auth/signup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, username, password }),
+            });
+
+            const data = await resp.json().catch(() => null);
+
+            if (!resp.ok) {
+                setError(data?.message || "Some error occured");
+                return;
+            }
+
+            await signIn(data.token);
+        } catch (error) {
+            console.log('Signup error:', error);
+            const message = error instanceof Error ? error.message : 'Unknown error';
+            setError("Some error occurred: " + message);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <>
@@ -45,9 +86,7 @@ export default function SignupScreen() {
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
                 className="flex-1"
             >
-                <ScrollView
-                    contentContainerClassName="flex-grow justify-center gap-6 p-6"
-                >
+                <ScrollView contentContainerClassName="flex-grow justify-center gap-6 p-6">
                     <Card>
                         <CardHeader>
                             <CardTitle>Hi there!</CardTitle>
@@ -55,9 +94,17 @@ export default function SignupScreen() {
                         </CardHeader>
 
                         <CardContent>
+                            {error && (
+                                <Alert variant="destructive" icon={AlertCircleIcon} className="mb-4">
+                                    <AlertTitle>{error}</AlertTitle>
+                                </Alert>
+                            )}
+
                             <View className="gap-4">
-                                <View className="gap-2" >
-                                    <Label nativeID="email" htmlFor="email">Email</Label>
+                                <View className="gap-2">
+                                    <Label nativeID="email" htmlFor="email">
+                                        Email
+                                    </Label>
                                     <Input
                                         id="email"
                                         aria-labelledby="email"
@@ -69,8 +116,13 @@ export default function SignupScreen() {
                                     />
                                 </View>
 
-                                <View className="gap-2" >
-                                    <Label nativeID="username" htmlFor="username">Username</Label>
+                                <View className="gap-2">
+                                    <Label
+                                        nativeID="username"
+                                        htmlFor="username"
+                                    >
+                                        Username
+                                    </Label>
                                     <Input
                                         id="username"
                                         aria-labelledby="username"
@@ -83,7 +135,12 @@ export default function SignupScreen() {
                                 </View>
 
                                 <View className="gap-2">
-                                    <Label nativeID="password" htmlFor="password">Password</Label>
+                                    <Label
+                                        nativeID="password"
+                                        htmlFor="password"
+                                    >
+                                        Password
+                                    </Label>
                                     <Input
                                         id="password"
                                         aria-labelledby="password"
@@ -96,7 +153,12 @@ export default function SignupScreen() {
                                 </View>
 
                                 <View className="gap-2">
-                                    <Label nativeID="repeatPassword" htmlFor="repeatPassword">Password</Label>
+                                    <Label
+                                        nativeID="repeatPassword"
+                                        htmlFor="repeatPassword"
+                                    >
+                                        Password
+                                    </Label>
                                     <Input
                                         id="repeatPassword"
                                         aria-labelledby="repeatPassword"
@@ -114,15 +176,23 @@ export default function SignupScreen() {
                             <Button
                                 className="w-full"
                                 disabled={signupDisabled || loading}
-                                onPress={onSubmit}>
-                                {loading && <View className="pointer-events-none animate-spin">
-                                    <Icon as={Loader2} className="text-primary-foreground" />
-                                </View>}
+                                onPress={onSubmit}
+                            >
+                                {loading && (
+                                    <View className="pointer-events-none animate-spin">
+                                        <Icon
+                                            as={Loader2}
+                                            className="text-primary-foreground"
+                                        />
+                                    </View>
+                                )}
                                 <Text>Sign up</Text>
                             </Button>
 
                             <View className="mt-6 flex-row gap-1">
-                                <Text className="text-muted-foreground">Already have an account?</Text>
+                                <Text className="text-muted-foreground">
+                                    Already have an account?
+                                </Text>
                                 <Link href="/login">
                                     <Text className="font-medium">Log in</Text>
                                 </Link>
@@ -132,5 +202,5 @@ export default function SignupScreen() {
                 </ScrollView>
             </KeyboardAvoidingView>
         </>
-    )
+    );
 }
