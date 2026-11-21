@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@10play/tentap-editor": "^1.1.0",
+    "@rn-primitives/dialog": "^1.5.2",
+    "@rn-primitives/dropdown-menu": "^1.5.2",
     "@rn-primitives/label": "^1.5.2",
     "@rn-primitives/portal": "~1.4.0",
     "@rn-primitives/slot": "^1.5.2",

@@ -91,7 +91,6 @@ export default function Screen() {
                 renderItem={({ item }) => (
                     <Pressable
                         onPress={() => {
-                            // noteCache.set(item.id, item);
                             router.push({ pathname: '/new-note', params: { id: item.id } });
                         }}
                         className='rounded-xl border border-border bg-card p-4 active:opacity-70'

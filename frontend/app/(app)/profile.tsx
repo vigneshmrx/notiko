@@ -27,10 +27,6 @@ export default function ProfileScreen() {
                 <Text className="text-muted-foreground">{me?.email}</Text>
             </View>
 
-            <Text className="text-muted-foreground">
-                URL being used: {API_URL}
-            </Text>
-
             <Button variant="outline" onPress={signOut}>
                 <Text>Log out</Text>
             </Button>

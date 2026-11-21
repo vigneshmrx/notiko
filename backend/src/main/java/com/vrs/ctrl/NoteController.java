@@ -61,4 +61,14 @@ public class NoteController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String id, Authentication auth) {
+        String userId = (String) auth.getPrincipal();
+        Note note = noteRepo.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
+
+        noteRepo.delete(note);
+    }
+
 }

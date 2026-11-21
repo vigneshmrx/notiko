@@ -42,6 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         userId, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (JwtException | IllegalArgumentException e) {
+                System.out.println("JWT rejected: " + e.getMessage());
                 SecurityContextHolder.clearContext();
             }
         }

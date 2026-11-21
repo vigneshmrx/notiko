@@ -1,35 +1,49 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/text";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import { Link, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
-import { AlertCircleIcon } from 'lucide-react-native';
+import {
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    View,
+} from "react-native";
+import { AlertCircleIcon, EyeIcon, EyeOffIcon } from "lucide-react-native";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { API_URL } from "@/lib/api";
-import { Loader2 } from 'lucide-react-native';
+import { Loader2 } from "lucide-react-native";
 import { Icon } from "@/components/ui/icon";
 import { useAuth } from "@/lib/auth";
 
 const SCREEN_OPTIONS = {
-    title: '',
+    title: "",
     headerTransparent: true,
     headerBackVisible: false,
     gestureEnabled: false,
-    headerRight: () => <ThemeToggle />
+    headerRight: () => <ThemeToggle />,
 };
 
 export default function LoginScreen() {
     const { signIn } = useAuth();
 
     const [loginDisabled, setLoginDisabled] = useState(true);
-    const [username, setUsername] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
+    const [username, setUsername] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [visible, setVisible] = useState(false);
 
     useEffect(() => {
         if (username && password) setLoginDisabled(false);
@@ -40,7 +54,7 @@ export default function LoginScreen() {
         setError(null);
         try {
             setLoading(true);
-            console.log('simulating API call...');
+            console.log("simulating API call...");
             const resp = await fetch(`${API_URL}/api/auth/login`, {
                 method: "POST",
                 headers: {
@@ -52,20 +66,20 @@ export default function LoginScreen() {
             const data = await resp.json().catch(() => null);
 
             if (!resp.ok) {
-                setError(data?.message || 'Some error occurred');
+                setError(data?.message || "Some error occurred");
                 return;
             }
 
             await signIn(data.token);
         } catch (error) {
-            console.log('Login error:', error);
-            const message = error instanceof Error ? error.message : 'Unknown error';
+            console.log("Login error:", error);
+            const message =
+                error instanceof Error ? error.message : "Unknown error";
             setError("Some error occurred: " + message);
-        }
-        finally {
+        } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <>
@@ -74,25 +88,34 @@ export default function LoginScreen() {
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
                 className="flex-1"
             >
-                <ScrollView
-                    contentContainerClassName="flex-grow justify-center gap-6 p-6"
-                >
+                <ScrollView contentContainerClassName="flex-grow justify-center gap-6 p-6">
                     <Card>
                         <CardHeader>
                             <CardTitle>Welcome back</CardTitle>
-                            <CardDescription>Login to your account</CardDescription>
+                            <CardDescription>
+                                Login to your account
+                            </CardDescription>
                         </CardHeader>
 
                         <CardContent>
                             {error && (
-                                <Alert variant="destructive" icon={AlertCircleIcon} className="mb-4">
+                                <Alert
+                                    variant="destructive"
+                                    icon={AlertCircleIcon}
+                                    className="mb-4"
+                                >
                                     <AlertTitle>{error}</AlertTitle>
                                 </Alert>
                             )}
 
                             <View className="gap-4">
-                                <View className="gap-2" >
-                                    <Label nativeID="username" htmlFor="username">Username</Label>
+                                <View className="gap-2">
+                                    <Label
+                                        nativeID="username"
+                                        htmlFor="username"
+                                    >
+                                        Username
+                                    </Label>
                                     <Input
                                         id="username"
                                         aria-labelledby="username"
@@ -105,16 +128,48 @@ export default function LoginScreen() {
                                 </View>
 
                                 <View className="gap-2">
-                                    <Label nativeID="password" htmlFor="password">Password</Label>
-                                    <Input
-                                        id="password"
-                                        aria-labelledby="password"
-                                        placeholder="••••••••"
-                                        secureTextEntry
-                                        autoComplete="password"
-                                        value={password}
-                                        onChangeText={setPassword}
-                                    />
+                                    <Label
+                                        nativeID="password"
+                                        htmlFor="password"
+                                    >
+                                        Password
+                                    </Label>
+                                    <View className="justify-center">
+                                        <Input
+                                            id="password"
+                                            aria-labelledby="password"
+                                            placeholder="••••••••"
+                                            secureTextEntry={!visible}
+                                            autoCapitalize="none"
+                                            autoComplete="password"
+                                            value={password}
+                                            onChangeText={setPassword}
+                                            className="pr-11"
+                                        />
+                                        <Pressable
+                                            onPress={(e) => {
+                                                e.preventDefault();
+                                                setVisible(!visible);
+                                            }}
+                                            hitSlop={8}
+                                            accessibilityRole="button"
+                                            accessibilityLabel={
+                                                visible
+                                                    ? "Hide password"
+                                                    : "Show password"
+                                            }
+                                            className="absolute right-3"
+                                        >
+                                            <Icon
+                                                as={
+                                                    visible
+                                                        ? EyeOffIcon
+                                                        : EyeIcon
+                                                }
+                                                className="size-5 text-muted-foreground"
+                                            />
+                                        </Pressable>
+                                    </View>
                                 </View>
                             </View>
 
@@ -127,14 +182,21 @@ export default function LoginScreen() {
                                 disabled={loginDisabled || loading}
                                 onPress={onSubmit}
                             >
-                                {loading && <View className="pointer-events-none animate-spin">
-                                    <Icon as={Loader2} className="text-primary-foreground" />
-                                </View>}
+                                {loading && (
+                                    <View className="pointer-events-none animate-spin">
+                                        <Icon
+                                            as={Loader2}
+                                            className="text-primary-foreground"
+                                        />
+                                    </View>
+                                )}
                                 <Text>Log in</Text>
                             </Button>
 
                             <View className="mt-6 flex-row gap-1">
-                                <Text className="text-muted-foreground">Don't have an account?</Text>
+                                <Text className="text-muted-foreground">
+                                    Don't have an account?
+                                </Text>
                                 <Link href="/signup">
                                     <Text className="font-medium">Sign up</Text>
                                 </Link>
@@ -144,5 +206,5 @@ export default function LoginScreen() {
                 </ScrollView>
             </KeyboardAvoidingView>
         </>
-    )
+    );
 }
