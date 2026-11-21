@@ -1,22 +1,18 @@
+import { API_URL } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { noteCache } from "@/lib/note-cache";
+import { useRouter } from "expo-router";
 import {
-    DeleteIcon,
+    AlertCircleIcon,
     EllipsisVertical,
-    File,
     FileDown,
     Loader2,
     Trash,
 } from "lucide-react-native";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "./dropdown-menu";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text } from "./text";
-import { Icon } from "./icon";
 import { useState } from "react";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Button } from "./button";
 import {
     Dialog,
     DialogClose,
@@ -25,14 +21,17 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "./dialog";
-import { Button } from "./button";
-import { View } from "react-native";
-import { API_URL } from "@/lib/api";
-import { useRouter } from "expo-router";
-import { noteCache } from "@/lib/note-cache";
-import { useAuth } from "@/lib/auth";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "./dropdown-menu";
+import { Icon } from "./icon";
+import { Text } from "./text";
+import { Alert, AlertDescription, AlertTitle } from "./alert";
 
 export default function NotesRightHeader({ id }: { id: string | null }) {
     const insets = useSafeAreaInsets();
@@ -47,7 +46,7 @@ export default function NotesRightHeader({ id }: { id: string | null }) {
         top: insets.top,
         bottom: insets.bottom,
         left: 4,
-        right: 4,
+        right: 20,
     };
 
     const handleDelete = async () => {
@@ -67,8 +66,7 @@ export default function NotesRightHeader({ id }: { id: string | null }) {
 
             const data = await resp.json().catch(() => null);
 
-            // if (resp.status === 401) return signOut();
-            console.log("resp = ", resp);
+            if (resp.status === 401) return signOut();
             if (!resp.ok) {
                 setError(data?.message || "Some error occurred");
                 return;
@@ -87,18 +85,23 @@ export default function NotesRightHeader({ id }: { id: string | null }) {
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Icon as={EllipsisVertical} size={24} />
+                    <Icon
+                        as={EllipsisVertical}
+                        size={20}
+                        className="border-2 border-red-500"
+                    />
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent insets={dropdownInsets} sideOffset={2}>
+                <DropdownMenuContent insets={dropdownInsets} sideOffset={4}>
                     <DropdownMenuGroup>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem disabled={!id}>
                             <Icon as={FileDown} size={18} />
                             <Text>Download as PDF</Text>
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
                             onPress={() => setShowDelConfirm(true)}
+                            disabled={!id}
                         >
                             <Icon
                                 as={Trash}

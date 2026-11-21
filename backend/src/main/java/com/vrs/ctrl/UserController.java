@@ -21,6 +21,7 @@ public class UserController {
 
     @GetMapping("/me")
     public UserResponse me(Authentication authentication) {
+        System.out.println("Calling me");
         String userId = (String) authentication.getPrincipal();
         User user = users.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
