@@ -190,7 +190,7 @@ export default function NewNoteScreen() {
                             ) : null}
                         </View>
                     ),
-                    headerRight: () => <NotesRightHeader id={noteId.current} />,
+                    headerRight: () => <NotesRightHeader id={noteId.current} contentHtml={latestHtml.current} />,
                 }}
             />
             <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>

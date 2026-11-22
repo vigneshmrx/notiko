@@ -1,6 +1,7 @@
 import { API_URL } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { noteCache } from "@/lib/note-cache";
+import * as Print from "expo-print";
 import { useRouter } from "expo-router";
 import {
     AlertCircleIcon,
@@ -9,19 +10,19 @@ import {
     Loader2,
     Trash,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button } from "./button";
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "./dialog";
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "./alert-dialog";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -31,9 +32,15 @@ import {
 } from "./dropdown-menu";
 import { Icon } from "./icon";
 import { Text } from "./text";
-import { Alert, AlertDescription, AlertTitle } from "./alert";
+import { Alert, AlertTitle } from "./alert";
 
-export default function NotesRightHeader({ id }: { id: string | null }) {
+export default function NotesRightHeader({
+    id,
+    contentHtml,
+}: {
+    id: string | null;
+    contentHtml: string;
+}) {
     const insets = useSafeAreaInsets();
     const router = useRouter();
     const { token, signOut } = useAuth();
@@ -41,6 +48,8 @@ export default function NotesRightHeader({ id }: { id: string | null }) {
     const [showDelConfirm, setShowDelConfirm] = useState(false);
     const [delLoading, setDelLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const deletingRef = useRef(false);
 
     const dropdownInsets = {
         top: insets.top,
@@ -55,6 +64,7 @@ export default function NotesRightHeader({ id }: { id: string | null }) {
             return;
         }
 
+        deletingRef.current = true;
         setDelLoading(true);
 
         try {
@@ -77,7 +87,32 @@ export default function NotesRightHeader({ id }: { id: string | null }) {
         } catch {
             setError("Some error occured");
         } finally {
+            deletingRef.current = false;
             setDelLoading(false);
+        }
+    };
+
+    const handleDownloadPdf = async () => {
+        if (!contentHtml) return;
+
+        try {
+            const doc = `<html>
+              <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <style>
+                  body { font-family: Roboto, Helvetica, Arial, sans-serif;
+                         color: #000; background: #fff; padding: 24px; line-height: 1.5; }
+                  img { max-width: 100%; }
+                  pre, code { background: #f4f4f5; }
+                </style>
+              </head>
+              <body>${contentHtml}</body>
+            </html>`;
+
+            await Print.printAsync({ html: doc });
+        } catch (err) {
+            console.error("pdf conversion error: " + error);
+            setError("Count not create PDF");
         }
     };
 
@@ -94,14 +129,20 @@ export default function NotesRightHeader({ id }: { id: string | null }) {
 
                 <DropdownMenuContent insets={dropdownInsets} sideOffset={4}>
                     <DropdownMenuGroup>
-                        <DropdownMenuItem disabled={!id}>
+                        <DropdownMenuItem
+                            disabled={!id}
+                            onPress={handleDownloadPdf}
+                        >
                             <Icon as={FileDown} size={18} />
                             <Text>Download as PDF</Text>
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
-                            onPress={() => setShowDelConfirm(true)}
                             disabled={!id}
+                            onPress={() => {
+                                setError("");
+                                setShowDelConfirm(true);
+                            }}
                         >
                             <Icon
                                 as={Trash}
@@ -119,29 +160,44 @@ export default function NotesRightHeader({ id }: { id: string | null }) {
 
     function confirmDeleteDialog() {
         return (
-            <Dialog
+            <AlertDialog
                 open={showDelConfirm}
-                onOpenChange={(value) =>
-                    !delLoading && setShowDelConfirm(value)
-                }
+                onOpenChange={(value) => {
+                    if (deletingRef.current) return;
+                    if (value) setError(null);
+                    !delLoading && setShowDelConfirm(value);
+                }}
             >
-                <DialogContent className="">
-                    <DialogHeader>
-                        <DialogTitle>Delete Note?</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to delete this note? This
-                            action is not reversible.
-                        </DialogDescription>
-                    </DialogHeader>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Are you absolutely sure?
+                        </AlertDialogTitle>
 
-                    <DialogFooter className="flex-row gap-2 justify-end">
-                        <DialogClose asChild>
-                            <Button variant="outline" disabled={delLoading}>
-                                <Text>Cancel</Text>
-                            </Button>
-                        </DialogClose>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete your note.
+                        </AlertDialogDescription>
 
-                        <Button disabled={delLoading} onPress={handleDelete}>
+                        {error && (
+                            <Alert variant="destructive" icon={AlertCircleIcon}>
+                                <AlertTitle>{error}</AlertTitle>
+                            </Alert>
+                        )}
+                    </AlertDialogHeader>
+
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={delLoading}>
+                            <Text>Cancel</Text>
+                        </AlertDialogCancel>
+
+                        <AlertDialogAction
+                            disabled={delLoading}
+                            onPress={(e) => {
+                                e.preventDefault();
+                                handleDelete();
+                            }}
+                        >
                             {delLoading && (
                                 <View className="pointer-events-none animate-spin">
                                     <Icon
@@ -150,11 +206,11 @@ export default function NotesRightHeader({ id }: { id: string | null }) {
                                     />
                                 </View>
                             )}
-                            <Text>Delete</Text>
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                            <Text>Continue</Text>
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         );
     }
 }
