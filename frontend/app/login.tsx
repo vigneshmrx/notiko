@@ -134,7 +134,7 @@ export default function LoginScreen() {
                                     >
                                         Password
                                     </Label>
-                                    <View className="justify-center">
+                                    {/* <View className="justify-center">
                                         <Input
                                             id="password"
                                             aria-labelledby="password"
@@ -169,11 +169,45 @@ export default function LoginScreen() {
                                                 className="size-5 text-muted-foreground"
                                             />
                                         </Pressable>
+                                    </View> */}
+
+                                    <View className="flex-row items-center rounded-md border border-input bg-background">
+                                        <Input
+                                            id="password"
+                                            aria-labelledby="password"
+                                            placeholder="••••••••"
+                                            secureTextEntry={!visible}
+                                            autoCapitalize="none"
+                                            autoComplete="password"
+                                            value={password}
+                                            onChangeText={setPassword}
+                                            className="flex-1 border-0 bg-transparent shadow-none"
+                                        />
+                                        <Pressable
+                                            onPress={() =>
+                                                setVisible((v) => !v)
+                                            }
+                                            hitSlop={8}
+                                            accessibilityRole="button"
+                                            accessibilityLabel={
+                                                visible
+                                                    ? "Hide password"
+                                                    : "Show password"
+                                            }
+                                            className="px-3"
+                                        >
+                                            <Icon
+                                                as={
+                                                    visible
+                                                        ? EyeOffIcon
+                                                        : EyeIcon
+                                                }
+                                                className="size-5 text-muted-foreground"
+                                            />
+                                        </Pressable>
                                     </View>
                                 </View>
                             </View>
-
-                            <Text>URL Used: {API_URL}</Text>
                         </CardContent>
 
                         <CardFooter className="flex-col">

@@ -38,16 +38,19 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changePassword(@Valid @RequestBody ChangePwdRequest req, Authentication auth) {
         String userId = (String) auth.getPrincipal();
+        System.out.println("Inside the flow");
 
         Optional<User> oUser = userId != null ? users.findById(userId) : Optional.empty();
         if (oUser.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
         } else {
+            System.out.println("Got the user");
             User user = oUser.get();
 
             if (!encoder.matches(req.oldPassword(), user.getPasswordHash())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
             }
+            System.out.println("Password matches");
 
             user.setPasswordHash(encoder.encode(req.newPassword()));
             users.save(user);
